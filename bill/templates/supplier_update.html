@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaBill</title>
+</head>
+<body>
+    <h1>Update Supplier</h1>
+    <form method="POST">
+        {% csrf_token %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" name="name" value="{{supplier.name}}">
+        </div>
+
+        <div>
+            <label for="gst">GSTIN</label>
+            <input type="text" name="gst" value="{{supplier.gst}}" >
+        </div>
+
+        <div>
+            <label for="adrs">Address:</label>
+            <input type="text" name="adrs" value="{{supplier.adrs}}">
+        </div>
+
+        <div>
+            <label for="city">City:</label>
+            <input type="text" name="city" value="{{supplier.city}}">
+        </div>
+
+        <div>
+            <label for="state">State:</label>
+            <input type="text" name="state" value="{{supplier.state}}">
+        </div>
+
+        <div>
+            <label for="phone">Phone: </label>
+            <input type="text" name="phone" value="{{supplier.phone}}">
+        </div>
+
+        <div>
+            <label for="email">Email: </label>
+            <input type="email" name="email" value="{{supplier.email}}">
+        </div>
+
+        <button type="submit">Update</button>
+    </form>
+</body>
+</html>
