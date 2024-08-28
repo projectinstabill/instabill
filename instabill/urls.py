@@ -15,6 +15,8 @@ urlpatterns = [
     path('update_profile/', update_profile, name='update_profile'),
     path('home/', home, name='home'),
     
+    path('delete_profile/<int:pk>', update_profile, name='update_profile'),
+    
     path('customer_create/', customer_create, name='customer_create'),
     path('customer_read/', customer_read, name='customer_read'),
     path('customer_update/<int:pk>/', customer_update, name='customer_update'),
