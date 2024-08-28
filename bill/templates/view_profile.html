@@ -155,6 +155,7 @@
 
             <center>
                 <a href="{% url 'update_profile' %}"><button type="button" class="btn btn-primary">Update</button></a>
+                <a href="{% url 'delete_account' request.user.id %}"><button type="button" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this account?');">Delete Account</button></a>
             </center>
             {% endfor %}
     </div>

@@ -28,7 +28,7 @@ def login_page(request):
     
     return render(request, 'login_page.html')
 
-@login_required
+@login_required(login_url="/login_page/")
 def logout_page(request):
     logout(request)
     return redirect('/')
@@ -62,7 +62,16 @@ def register(request):
     
     return render(request, 'register.html')
 
-@login_required
+
+@login_required(login_url="/login_page/")
+def delete_account(request,pk):
+    user = User.objects.get(id=pk)
+    profile = Profile.objects.get(id=1)
+    user.delete()
+    profile.delete()
+    return redirect('login_page')
+
+@login_required(login_url="/login_page/")
 def setup_profile(request):
     if Profile.objects.filter(user=request.user).exists():
         return redirect('home')
@@ -106,12 +115,12 @@ def setup_profile(request):
 
 
 
-@login_required
+@login_required(login_url="/login_page/")
 def view_profile(request):
     profile= Profile.objects.filter(user=request.user)
     return render(request, 'view_profile.html',{"profile":profile})
 
-@login_required
+@login_required(login_url="/login_page/")
 def update_profile(request):
     profile = Profile.objects.get(user=request.user)  # Get the profile of the logged-in user
 
@@ -151,13 +160,13 @@ def update_profile(request):
 
     return render(request, 'update_profile.html', {'profile': profile})
 
-@login_required
+@login_required(login_url="/login_page/")
 def home(request):
     if not Profile.objects.filter(user=request.user).exists():
         return redirect('setup_profile')
     return render(request, 'home.html')
 
-@login_required
+@login_required(login_url="/login_page/")
 def customer_create(request):
     if request.method=="POST":
         name= request.POST.get('name')
@@ -184,14 +193,14 @@ def customer_create(request):
     
     return render(request, 'customer_create.html')
 
-@login_required
+@login_required(login_url="/login_page/")
 def customer_read(request):
     customer=Customer.objects.filter(user=request.user)
     if not customer.exists():
         messages.info(request, 'No Customer Found')
     return render(request, 'customer_read.html', {"customer":customer})
 
-@login_required
+@login_required(login_url="/login_page/")
 def customer_update(request,pk):
     customer = Customer.objects.get(id=pk)
 
@@ -219,13 +228,13 @@ def customer_update(request,pk):
         
     return render(request, 'customer_update.html', {'customer':customer})
 
-@login_required
+@login_required(login_url="/login_page/")
 def customer_delete(request,pk):
     customer=Customer.objects.filter(id=pk)
     customer.delete()
     return redirect('customer_read')
 
-@login_required
+@login_required(login_url="/login_page/")
 def supplier_create(request):
     if request.method=="POST":
         name= request.POST.get('name')
@@ -252,14 +261,14 @@ def supplier_create(request):
     
     return render(request, 'supplier_create.html')
 
-@login_required
+@login_required(login_url="/login_page/")
 def supplier_read(request):
     supplier=Supplier.objects.filter(user=request.user)
     if not supplier.exists():
         messages.info(request, 'No supplier Found')
     return render(request, 'supplier_read.html', {"supplier":supplier})
 
-@login_required
+@login_required(login_url="/login_page/")
 def supplier_update(request,pk):
     supplier = Supplier.objects.get(id=pk)
 
@@ -288,7 +297,7 @@ def supplier_update(request,pk):
     return render(request, 'supplier_update.html', {'supplier':supplier})
 
 
-@login_required
+@login_required(login_url="/login_page/")
 def supplier_delete(request,pk):
     supplier=Supplier.objects.filter(id=pk)
     supplier.delete()
@@ -326,7 +335,24 @@ def item_read(request):
 
 @login_required
 def item_update(request,pk):
-    return render(request, 'item_update.html')
+    item = Item.objects.get(id=pk)
+    if request.method=="POST":
+        name = request.POST.get('name')
+        hsn = request.POST.get('hsn')
+        tax = request.POST.get('tax')
+        bal = request.POST.get('bal')
+        
+
+        item.name = name
+        item.hsn = hsn
+        item.tax = tax
+        item.bal = bal
+
+        item.save()
+
+        return redirect('item_read')
+
+    return render(request, 'item_update.html', {"item" : item})
 
 @login_required(login_url="/login_page/")
 def item_delete(request, pk):
@@ -354,10 +380,8 @@ def invoice_create(request):
         no_of_items = int(request.POST.get('no_of_items'))
         other_charges = Decimal(request.POST.get('other_charges'))
         discount = Decimal(request.POST.get('discount'))
-        
         profile=Profile.objects.get(user=request.user)
-        profile.bill_count+=1
-        profile.save()
+        
 
         taxable_amt = Decimal('0.00')
         sigst_amt=Decimal('0.00')
@@ -426,17 +450,20 @@ def invoice_create(request):
             grand_total_words=amount_to_words(grand_total)
         )
 
-        invoice_to.bal+=grand_total
+        invoice_to.bal-=grand_total
         invoice_to.save()
 
         invoice_obj.save()
         invoice_obj.invoice_items.set(invoice_items_arr)
 
+        profile.bill_count+=1
+        profile.save()
+        
         return redirect("invoice_read")
     else:
         customer = Customer.objects.filter(user=request.user)
         item = Item.objects.filter(user=request.user)
-        profile = Profile.objects.get(id=1)
+        profile = Profile.objects.get(user=request.user)
         return render(request, 'invoice_create.html', {'customer': customer, 'items': item, 'profile':profile})
 
 
@@ -554,6 +581,8 @@ def invoice_read(request):
 @login_required(login_url="/login_page/")
 def invoice_delete(request,pk):
     profile = Profile.objects.get(user=request.user)
+    profile.bill_count-=1
+    profile.save()
     invoice=Invoice.objects.get(id=pk)
     invoice.delete()
     return redirect('invoice_read')

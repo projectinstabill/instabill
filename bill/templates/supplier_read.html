@@ -70,7 +70,7 @@
                         </div>
                         <div class="card-footer d-flex justify-content-between">
                             <a href="{% url 'supplier_update' i.id %}" class="btn btn-warning">Edit</a>
-                            <a href="{% url 'supplier_delete' i.id %}" class="btn btn-danger">Delete</a>
+                            <a href="{% url 'supplier_delete' i.id %}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this supplier?');">Delete</a>
                         </div>
                     </div>
                 </div>
