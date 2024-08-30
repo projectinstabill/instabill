@@ -125,8 +125,7 @@
             </div>
 
 
-            <div id="fieldsContainer" style="background-color: rgb(242, 245, 255); border-radius: 4px; padding: 5px;">
-            </div>
+            <div id="fieldsContainer"></div>
 
 
             <div class="row mb-3 align-items-center">
@@ -170,6 +169,7 @@
             let fieldsHTML = '';
             for (let i = 1; i <= numberOfFields; i++) {
                 fieldsHTML += `
+                <div style="background-color: rgb(242, 245, 255); border-radius: 4px; padding: 5px;">
                     <div class="row mb-3 align-items-center">
                     <div class="col-md-4">
                         <label class="form-label" style="font-size: 15px;">Item ${i}</label>
@@ -211,7 +211,8 @@
                         <input type="text" class="form-control" name="unit${i}" value="KGS">
                     </div>
                     </div>
-                    <hr style="height: 2px; background-color: black; border: none;">
+                    </div>
+                    <br>
                 `;
             }
             container.innerHTML = fieldsHTML;

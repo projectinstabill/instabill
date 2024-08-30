@@ -129,40 +129,21 @@
                 </div>
             </div>
             <br><u><h4 class="text-center">Bank Details</h4></u><br>
+
             <div class="row mb-3 align-items-center">
                 <div class="col-md-4">
-                    <label for="bank_name" class="form-label" style="font-size: 15px;"> Bank Name:</label>
+                    <label for="bill_count" class="form-label" style="font-size: 15px;">Primary Bank:</label>
                 </div>
                 <div class="col-md-6">
-                    <input type="text" class="form-control" value="{{profile.bank_name}}" name="bank_name" required>
+                    <select class="form-control" name="bank" onchange="checkAddOption(this)" required>
+                        <option value="#">--Select--</option>
+                        {% for b in bank %}
+                        <option value="{{ b.id }}">{{ b.name}}</option>
+                        {% endfor %}
+                        <option value="add_bank">Add Bank</option>
+                    </select>
                 </div>
             </div>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-4">
-                    <label for="acno" class="form-label" style="font-size: 15px;"> A/C Number:</label>
-                </div>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" value="{{profile.acno}}" name="acno" required>
-                </div>
-            </div>
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-4">
-                    <label for="ifsc" class="form-label" style="font-size: 15px;"> IFSC :</label>
-                </div>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" value="{{profile.bank_ifsc}}" name="bank_ifsc" required>
-                </div>
-            </div>
-            
-            <div class="row mb-3 align-items-center">
-                <div class="col-md-4">
-                    <label for="branch" class="form-label" style="font-size: 15px;"> Branch:</label>
-                </div>
-                <div class="col-md-6">
-                    <input type="text" class="form-control" value="{{profile.bank_branch}}" name="bank_branch" required>
-                </div>
-            </div>
-            
 
             <center>
                 <button type="submit" class="btn btn-primary">Save</button>
@@ -177,6 +158,15 @@
             <span class="text-muted">&copy; 2024 InstaBill. All rights reserved.</span>
         </div>
     </footer>
+
+
+    <script>
+        function checkAddOption(selectElement) {
+            if (selectElement.value === "add_bank") {
+                window.location.href = "/bank_create/";
+            }
+        }
+    </script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>

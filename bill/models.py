@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class Bank(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=50, blank=True, null=True)
+    acno = models.CharField(max_length=20, blank=True, null=True)
+    ifsc = models.CharField(max_length=5, blank=True, null=True)
+    branch = models.CharField(max_length=25, blank=True, null=True)
+    bal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -14,20 +21,7 @@ class Profile(models.Model):
     bal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     bill_count = models.IntegerField(blank=True, null=True, default=0)
     cash = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    bank_name = models.CharField(max_length=100, blank=True, null=True, default="")
-    acno = models.CharField(max_length=30, blank=True, null=True, default="")
-    bank_branch = models.CharField(max_length=50, blank=True, null=True, default="")
-    bank_ifsc = models.CharField(max_length=20, blank=True, null=True, default="")
-
-
-class Bank(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE )
-    category = models.CharField(max_length=15)
-    name = models.CharField(max_length=255)
-    acno = models.CharField(max_length=20)
-    branch = models.TextField()
-    ifsc = models.CharField(max_length=15)
-    bal = models.DecimalField(decimal_places=2, max_digits=20)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE, blank=True, null=True, default=0)
 
 
 class FinancialYear(models.Model):
@@ -96,8 +90,3 @@ class Invoice(models.Model):
     grand_total=models.DecimalField(max_digits=10, decimal_places=2)
     grand_total_words=models.CharField(max_length=150, null=True)
 
-class Payment(models.Model):
-    party = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    payment_type = models.CharField(max_length=10)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    mode = models.CharField(max_length=10)

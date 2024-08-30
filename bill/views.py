@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -77,18 +77,30 @@ def setup_profile(request):
         return redirect('home')
     
     if request.method == "POST":
-        name = request.POST.get('c_name')
-        gst = request.POST.get('gst')
+        name = request.POST.get('c_name').upper()
+        gst = request.POST.get('gst').upper()
         adrs = request.POST.get('adrs')
         city = request.POST.get('city')
         state = request.POST.get('state')
         phone = request.POST.get('phone')
         email = request.POST.get('c_email')
-        bank_name = request.POST.get('bank_name')
+        
+        bank_name = request.POST.get('bank_name').upper()
         acno = request.POST.get('acno')
         bank_branch = request.POST.get('bank_branch')
-        bank_ifsc = request.POST.get('bank_ifsc')
+        bank_ifsc = request.POST.get('bank_ifsc').upper()
         
+        bank_obj= Bank(
+            user = request.user,
+            name = bank_name,
+            acno = acno,
+            ifsc = bank_ifsc,
+            branch = bank_branch,
+            bal = 0
+        )
+        bank_obj.save()
+
+        # bank=Bank.objects.get(id=1)
         
         # Create the profile
         profile = Profile(
@@ -100,11 +112,7 @@ def setup_profile(request):
             state=state,
             phone=phone,
             email=email,
-            bank_name=bank_name,
-            acno=acno,
-            bank_branch=bank_branch,
-            bank_ifsc=bank_ifsc
-
+            bank = bank_obj
         )
         profile.save()
 
@@ -123,42 +131,34 @@ def view_profile(request):
 @login_required(login_url="/login_page/")
 def update_profile(request):
     profile = Profile.objects.get(user=request.user)  # Get the profile of the logged-in user
+    bank = Bank.objects.all()
 
     if request.method == 'POST':
-        c_name = request.POST.get('c_name')
-        gst = request.POST.get('gst')
+        c_name = request.POST.get('c_name').upper()
+        gst = request.POST.get('gst').upper()
         adrs = request.POST.get('adrs')
         city = request.POST.get('city')
         state = request.POST.get('state')
         phone = request.POST.get('phone')
         c_email = request.POST.get('c_email')
         bill_count = request.POST.get('bill_count')
-        bank_name = request.POST.get('bank_name')
-        acno = request.POST.get('acno')
-        bank_branch = request.POST.get('bank_branch')
-        bank_ifsc = request.POST.get('bank_ifsc')
+        bank_id= request.POST.get('bank')
 
-        # Validate fields (basic example, customize as needed)
-        if not all([c_name, gst, adrs, city, state, phone, c_email]):
-            messages.error(request, 'All fields are required.')
-        else:
-            # Update the profile
-            profile.name = c_name
-            profile.gst = gst
-            profile.adrs = adrs
-            profile.city = city
-            profile.state = state
-            profile.phone = phone
-            profile.email = c_email
-            profile.bill_count = bill_count
-            profile.bank_name = bank_name
-            profile.acno = acno
-            profile.bank_branch = bank_branch
-            profile.bank_ifsc = bank_ifsc
-            profile.save()
-            return redirect('view_profile')  # Redirect to home or another page
+        bank= Bank.objects.get(id=bank_id)
 
-    return render(request, 'update_profile.html', {'profile': profile})
+        profile.name = c_name
+        profile.gst = gst
+        profile.adrs = adrs
+        profile.city = city
+        profile.state = state
+        profile.phone = phone
+        profile.email = c_email
+        profile.bill_count = bill_count
+        profile.bank = bank
+        profile.save()
+        return redirect('view_profile')  # Redirect to home or another page
+
+    return render(request, 'update_profile.html', {'profile': profile, "bank": bank})
 
 @login_required(login_url="/login_page/")
 def home(request):
@@ -169,11 +169,11 @@ def home(request):
 @login_required(login_url="/login_page/")
 def customer_create(request):
     if request.method=="POST":
-        name= request.POST.get('name')
-        gst= request.POST.get('gst')
+        name= request.POST.get('name').upper()
+        gst= request.POST.get('gst').upper()
         adrs= request.POST.get('adrs')
         city= request.POST.get('city')
-        state= request.POST.get('state')
+        state= request.POST.get('state').upper()
         phone= request.POST.get('phone')
         email= request.POST.get('email')
 
@@ -205,11 +205,11 @@ def customer_update(request,pk):
     customer = Customer.objects.get(id=pk)
 
     if request.method=="POST":
-        name= request.POST.get('name')
-        gst= request.POST.get('gst')
+        name= request.POST.get('name').upper()
+        gst= request.POST.get('gst').upper()
         adrs= request.POST.get('adrs')
         city= request.POST.get('city')
-        state= request.POST.get('state')
+        state= request.POST.get('state').upper()
         phone= request.POST.get('phone')
         email= request.POST.get('email')
 
@@ -237,11 +237,11 @@ def customer_delete(request,pk):
 @login_required(login_url="/login_page/")
 def supplier_create(request):
     if request.method=="POST":
-        name= request.POST.get('name')
-        gst= request.POST.get('gst')
+        name= request.POST.get('name').upper()
+        gst= request.POST.get('gst').upper()
         adrs= request.POST.get('adrs')
         city= request.POST.get('city')
-        state= request.POST.get('state')
+        state= request.POST.get('state').upper()
         phone= request.POST.get('phone')
         email= request.POST.get('email')
 
@@ -273,11 +273,11 @@ def supplier_update(request,pk):
     supplier = Supplier.objects.get(id=pk)
 
     if request.method=="POST":
-        name= request.POST.get('name')
-        gst= request.POST.get('gst')
+        name= request.POST.get('name').upper()
+        gst= request.POST.get('gst').upper()
         adrs= request.POST.get('adrs')
         city= request.POST.get('city')
-        state= request.POST.get('state')
+        state= request.POST.get('state').upper()
         phone= request.POST.get('phone')
         email= request.POST.get('email')
 
@@ -307,7 +307,7 @@ def supplier_delete(request,pk):
 @login_required(login_url="/login_page/")
 def item_create(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
+        name = request.POST.get('name').upper()
         hsn = request.POST.get('hsn')
         tax = float(request.POST.get('tax'))
         bal = float(request.POST.get('bal'))
@@ -337,7 +337,7 @@ def item_read(request):
 def item_update(request,pk):
     item = Item.objects.get(id=pk)
     if request.method=="POST":
-        name = request.POST.get('name')
+        name = request.POST.get('name').upper()
         hsn = request.POST.get('hsn')
         tax = request.POST.get('tax')
         bal = request.POST.get('bal')
@@ -375,8 +375,8 @@ def invoice_create(request):
         invoice_no = int(request.POST.get('invoice_no'))
         date = request.POST.get('date')
         eway = request.POST.get('eway')
-        transport = request.POST.get('transport')
-        vehicle_no = request.POST.get('vehicle_no')
+        transport = request.POST.get('transport').upper()
+        vehicle_no = request.POST.get('vehicle_no').upper()
         no_of_items = int(request.POST.get('no_of_items'))
         other_charges = Decimal(request.POST.get('other_charges'))
         discount = Decimal(request.POST.get('discount'))
@@ -470,104 +470,7 @@ def invoice_create(request):
 
 @login_required(login_url="/login_page/")
 def invoice_update(request,pk):
-    if request.method == "POST":
-        invoice=Invoice.objects.get(id=pk)
-
-        invoice_to_id = request.POST.get('invoice_to')
-        invoice_to = Customer.objects.get(id=invoice_to_id)
-        invoice_no = int(request.POST.get('invoice_no'))
-        date = request.POST.get('date')
-        eway = request.POST.get('eway')
-        transport = request.POST.get('transport')
-        vehicle_no = request.POST.get('vehicle_no')
-        no_of_items = int(request.POST.get('no_of_items'))
-        other_charges = Decimal(request.POST.get('other_charges'))
-        discount = Decimal(request.POST.get('discount'))
-        
-        profile=Profile.objects.get(user=request.user)
-        profile.bill_count+=1
-        profile.save()
-
-        taxable_amt = Decimal('0.00')
-        sigst_amt=Decimal('0.00')
-        cgst_amt=Decimal('0.00')
-        
-        invoice_items_arr = []
-        for i in range(1, no_of_items + 1):
-            item_details_id = request.POST.get('item' + str(i))
-            item_details = Item.objects.get(id=item_details_id)
-            quantity = Decimal(request.POST.get('quantity' + str(i)))
-            rate = Decimal(request.POST.get('rate' + str(i)))
-            unit = request.POST.get('unit' + str(i))
-
-            if profile.state==invoice_to.state:
-                sigst=item_details.tax/2
-                cgst=item_details.tax/2
-            else:
-                sigst=item_details.tax
-                cgst=0
-            
-
-            amount = quantity * rate
-            taxable_amt += amount
-            sigst_amt += Decimal(sigst * amount) / Decimal(100)
-            cgst_amt += Decimal(cgst * amount) / Decimal(100)
-            
-            billedItem_object = BilledItem(
-                item_details=item_details,
-                quantity=quantity,
-                rate=rate,
-                sigst=sigst,
-                cgst=cgst,
-                unit=unit,
-                amount=amount
-            )
-
-            item_details.bal-=quantity
-            item_details.save()
-
-
-            billedItem_object.save()
-            invoice_items_arr.append(billedItem_object)
-
-        taxable_amt+=other_charges-discount
-        tgst_amt = sigst_amt + cgst_amt
-        grand_total = taxable_amt + tgst_amt
-
-        date_obj = datetime.strptime(date, '%Y-%m-%d').date()
-
-        invoice_obj = Invoice(
-            user=request.user,
-            invoice_no=invoice_no,
-            date=date_obj,
-            eway=eway,
-            transport=transport,
-            vehicle_no=vehicle_no,
-            invoice_to=invoice_to,
-            no_of_items=no_of_items,
-            other_charges=other_charges,
-            discount=discount,
-            taxable_amt=taxable_amt,
-            sgst_amt=sigst_amt,
-            cgst_amt=cgst_amt,
-            tgst_amt=tgst_amt,
-            grand_total=grand_total,
-            grand_total_words=amount_to_words(grand_total)
-        )
-
-        invoice_to.bal+=grand_total
-        invoice_to.save()
-
-        invoice_obj.save()
-        invoice_obj.invoice_items.set(invoice_items_arr)
-
-        return redirect("invoice_read")
-    else:
-        customer = Customer.objects.filter(user=request.user)
-        item = Item.objects.filter(user=request.user)
-        profile = Profile.objects.get(id=1)
-        return render(request, 'invoice_create.html', {'customer': customer, 'items': item, 'profile':profile})
-
+    return HttpResponse("<h1>!!!Work In Progress!!!<h1>")
 
 @login_required(login_url="/login_page/")
 def invoice_read(request):
@@ -601,4 +504,60 @@ def invoice_billbook(request):
     x=range(1,20)
     return render(request, 'invoice_billbook.html', {"invoices":invoice, "profile":profile, 'x':x})
 
+@login_required(login_url="/login_page/")
+def bank_create(request):
+    if request.method=="POST":
+        name = request.POST.get('name').upper()
+        acno = request.POST.get('acno')
+        ifsc = request.POST.get('ifsc').upper()
+        branch = request.POST.get('branch').upper()
+        bal = Decimal(request.POST.get('bal'))
 
+        bank=Bank(
+            user=request.user,
+            name = name,
+            acno = acno,
+            ifsc = ifsc,
+            branch = branch,
+            bal = bal
+        )
+        bank.save()
+
+        return redirect('bank_read')
+    
+    return render(request, 'bank_create.html')
+
+@login_required(login_url="/login_page/")
+def bank_read(request):
+    bank=Bank.objects.filter(user=request.user)
+    if not bank.exists():
+        messages.info(request, 'No Bank Account Found')
+    return render(request, 'bank_read.html', {"bank":bank})
+
+@login_required(login_url="/login_page/")
+def bank_update(request,pk):
+    bank = Bank.objects.get(id=pk)
+
+    if request.method=="POST":
+        name = request.POST.get('name').upper()
+        acno = request.POST.get('acno')
+        ifsc = request.POST.get('ifsc').upper()
+        branch = request.POST.get('branch').upper()
+        bal = Decimal(request.POST.get('bal'))
+
+        bank.name = name
+        bank.acno = acno
+        bank.ifsc = ifsc
+        bank.branch = branch
+        bank.bal = bal
+
+        bank.save()
+        return redirect('bank_read')
+        
+    return render(request, 'bank_update.html', {'bank':bank})
+
+@login_required(login_url="/login_page/")
+def bank_delete(request,pk):
+    bank=Bank.objects.filter(id=pk)
+    bank.delete()
+    return redirect('bank_read')
