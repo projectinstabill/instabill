@@ -5,7 +5,7 @@ class Bank(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=50, blank=True, null=True)
     acno = models.CharField(max_length=20, blank=True, null=True)
-    ifsc = models.CharField(max_length=5, blank=True, null=True)
+    ifsc = models.CharField(max_length=15, blank=True, null=True)
     branch = models.CharField(max_length=25, blank=True, null=True)
     bal = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
 
